@@ -10,22 +10,79 @@
   </head>
   <body>
     <center>
-      <div>
+      <div id="game-container">
         <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
-        <canvas id="loadingCanvas" oncontextmenu="event.preventDefault()"
-                width="800" height="600"></canvas>
+        <canvas id="loadingCanvas" oncontextmenu="event.preventDefault()"></canvas>
       </div>
     </center>
 
     <script type='text/javascript'>
       function goFullScreen(){
-          var canvas = document.getElementById("canvas");
-          if(canvas.requestFullScreen)
-              canvas.requestFullScreen();
-          else if(canvas.webkitRequestFullScreen)
-              canvas.webkitRequestFullScreen();
-          else if(canvas.mozRequestFullScreen)
-              canvas.mozRequestFullScreen();
+          // Detect if we're on a mobile device
+          var isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+          // On mobile, use CSS fullscreen as it's more reliable
+          if(isMobile) {
+            var canvas = document.getElementById("canvas");
+            var footer = document.querySelector("footer");
+            var header = document.querySelector("h1");
+            var center = document.querySelector("center");
+            var body = document.body;
+
+            if(canvas.style.position !== 'fixed') {
+              // Set canvas buffer size to match viewport
+              canvas.width = window.innerWidth;
+              canvas.height = window.innerHeight;
+
+              canvas.style.position = 'fixed';
+              canvas.style.top = '0';
+              canvas.style.left = '0';
+              canvas.style.width = '100vw';
+              canvas.style.height = '100vh';
+              canvas.style.maxWidth = 'none';
+              canvas.style.maxHeight = 'none';
+              canvas.style.zIndex = '9999';
+              body.style.overflow = 'hidden';
+              body.style.margin = '0';
+              body.style.padding = '0';
+              body.style.backgroundColor = '#000';
+              if(footer) footer.style.visibility = 'hidden';
+              if(header) header.style.visibility = 'hidden';
+              if(center) center.style.backgroundColor = '#000';
+            } else {
+              canvas.style.position = '';
+              canvas.style.top = '';
+              canvas.style.left = '';
+              canvas.style.width = '';
+              canvas.style.height = '';
+              canvas.style.maxWidth = '';
+              canvas.style.maxHeight = '';
+              canvas.style.zIndex = '';
+              body.style.overflow = '';
+              body.style.margin = '';
+              body.style.padding = '';
+              body.style.backgroundColor = '';
+              if(footer) footer.style.visibility = '';
+              if(header) header.style.visibility = '';
+              if(center) center.style.backgroundColor = '';
+            }
+          } else {
+            // Desktop: use native fullscreen API
+            var elem = document.getElementById("game-container") || document.documentElement;
+            try {
+              if(elem.requestFullscreen) {
+                elem.requestFullscreen();
+              } else if(elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+              } else if(elem.mozRequestFullScreen) {
+                elem.mozRequestFullScreen();
+              } else if(elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+              }
+            } catch(e) {
+              console.error('Fullscreen error:', e);
+            }
+          }
       }
 
       function closeFullScreen() {
@@ -51,6 +108,15 @@
      var complete = false;
      function drawLoadingText(text, soFar, total) {
           var canvas = loadingContext.canvas;
+
+          // Set canvas size to match container (responsive)
+          var container = document.getElementById('game-container');
+          var containerWidth = container.clientWidth || 800;
+          var containerHeight = Math.min(window.innerHeight - 120, containerWidth * 0.75) || 600;
+
+          canvas.width = containerWidth;
+          canvas.height = containerHeight;
+
           var ratio = complete ? 1 : 0;
           if (soFar && total){
               ratio = soFar / total
@@ -60,42 +126,44 @@
          }
           //
           loadingContext.fillStyle = "rgb(54,69,79)";
-          loadingContext.fillRect(0, 0, canvas.scrollWidth, canvas.scrollHeight);
+          loadingContext.fillRect(0, 0, canvas.width, canvas.height);
 
-          loadingContext.font = '2em arial';
+          var baseFontSize = Math.min(containerWidth / 20, 32);
+          loadingContext.font = baseFontSize + 'px arial';
           loadingContext.textAlign = 'center'
           //
           loadingContext.fillStyle = "rgb(240,234,214)";
-          loadingContext.fillText(text, canvas.scrollWidth / 2, (canvas.scrollHeight / 2) - 40);
+          loadingContext.fillText(text, canvas.width / 2, (canvas.height / 2) - 40);
           //
+          var progressWidth = Math.min(400, containerWidth * 0.6);
           loadingContext.beginPath();
           loadingContext.strokeStyle = "rgb(240,234,214)";
-          loadingContext.rect((canvas.scrollWidth / 2) - 200,
-                              ( canvas.scrollHeight / 2) - 20,
-                              400,
+          loadingContext.rect((canvas.width / 2) - (progressWidth / 2),
+                              ( canvas.height / 2) - 20,
+                              progressWidth,
                               40
-              
-              
+
+
           );
           loadingContext.stroke();
           loadingContext.beginPath();
-          loadingContext.rect((canvas.scrollWidth / 2) - 200,
-                              ( canvas.scrollHeight / 2) - 20,
-                              400 * ratio,
+          loadingContext.rect((canvas.width / 2) - (progressWidth / 2),
+                              ( canvas.height / 2) - 20,
+                              progressWidth * ratio,
                               40
-              
-              
+
+
           );
           loadingContext.fill();
-          loadingContext.font = '4em arial';
-          loadingContext.fillText("Change Me", canvas.scrollWidth / 2, canvas.scrollHeight / 4);
-          loadingContext.font = '2em arial';
-          loadingContext.fillText("0.1.0", canvas.scrollWidth / 2, (canvas.scrollHeight / 4 + 45));
-          loadingContext.font = '1em arial';
+          loadingContext.font = (baseFontSize * 2) + 'px arial';
+          loadingContext.fillText("Change Me", canvas.width / 2, canvas.height / 4);
+          loadingContext.font = baseFontSize + 'px arial';
+          loadingContext.fillText("0.1.0", canvas.width / 2, (canvas.height / 4 + 45));
+          loadingContext.font = (baseFontSize * 0.6) + 'px arial';
           loadingContext.textAlign = 'left'
-          loadingContext.fillText("Powered By LÖVE", canvas.scrollWidth / 2 - 300, canvas.scrollHeight / 4 * 3);
+          loadingContext.fillText("Powered By LÖVE", canvas.width / 2 - (progressWidth / 2), canvas.height / 4 * 3);
          loadingContext.textAlign = 'right'
-         loadingContext.fillText("Game By: Your Name", canvas.scrollWidth / 2 + 300, canvas.scrollHeight / 4 * 3);
+         loadingContext.fillText("Game By: Your Name", canvas.width / 2 + (progressWidth / 2), canvas.height / 4 * 3);
      }
 
      window.onload = function () { window.focus(); };
@@ -128,6 +196,12 @@
           } else if (Module.remainingDependencies === 0) {
             document.getElementById('loadingCanvas').style.display = 'none';
             document.getElementById('canvas').style.display = 'block';
+
+            // Auto-fullscreen on mobile when loading is complete
+            var isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if(isMobile) {
+              setTimeout(goFullScreen, 100);
+            }
           }
         },
         totalDependencies: 0,

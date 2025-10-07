@@ -5,6 +5,8 @@
 h1 {
     font-family: arial;
     color: rgb( 11, 86, 117 );
+    font-size: 2em;
+    margin: 10px;
 }
 
 body {
@@ -12,18 +14,38 @@ body {
     background-repeat: no-repeat;
     font-family: arial;
     margin: 0;
-    padding: none;
+    padding: 0;
+    padding-bottom: 60px; /* Space for footer */
     background-color: rgb( 154, 205, 237 );
     color: rgb( 28, 78, 104 );
+}
+
+#game-container {
+    max-width: 100%;
+    padding: 0 10px;
 }
 
 footer {
     font-family: arial;
     font-size: 12px;
-    padding-left: 10px;
-    position:absolute;
+    padding: 10px;
+    position: fixed;
     bottom: 0;
-    width: auto;
+    left: 0;
+    width: 100%;
+    background-color: rgba(154, 205, 237, 0.95);
+    text-align: center;
+}
+
+footer p {
+    margin: 5px 0;
+}
+
+footer button {
+    margin: 5px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
 }
 
 /* Links */
@@ -46,4 +68,65 @@ a:hover {
     display: block;
     border: 0px none;
     visibility: hidden;
+    /* Allow canvas to resize with window while maintaining aspect ratio */
+    max-width: 100%;
+    max-height: calc(100vh - 120px); /* Account for header and footer */
+    width: 100%;
+    height: auto;
+}
+
+#loadingCanvas {
+    max-width: 100%;
+    max-height: calc(100vh - 120px);
+    width: 100%;
+    height: auto;
+}
+
+/* Hide header in fullscreen mode */
+#game-container:fullscreen h1,
+#game-container:-webkit-full-screen h1,
+#game-container:-moz-full-screen h1,
+#game-container:-ms-fullscreen h1 {
+    display: none;
+}
+
+/* Mobile responsive styles */
+@media screen and (max-width: 768px) {
+    h1 {
+        font-size: 1.5em;
+        margin: 5px;
+    }
+
+    footer {
+        font-size: 11px;
+        padding: 8px 5px;
+    }
+
+    footer button {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    #canvas {
+        max-height: calc(100vh - 100px);
+    }
+
+    #loadingCanvas {
+        max-height: calc(100vh - 100px);
+    }
+}
+
+@media screen and (max-width: 480px) {
+    h1 {
+        font-size: 1.2em;
+    }
+
+    footer {
+        font-size: 10px;
+    }
+
+    footer button {
+        padding: 5px 10px;
+        font-size: 11px;
+    }
 }

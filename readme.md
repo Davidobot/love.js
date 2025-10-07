@@ -97,6 +97,30 @@ return texturecolor * color / 2.0;
 
 8. If you'd like to run javascript from within your game, you might find [the following repo useful](https://github.com/MrcSnm/Love.js-Api-Player).
 
+9. **Canvas Resizing (Partial Support)**: The canvas element now automatically resizes when the browser window changes size. The resize handling includes:
+   - Monitoring window resize events
+   - Detecting fullscreen changes
+   - Periodically checking for CSS-based size changes
+   - Updating the canvas element dimensions to match its display size
+
+   The canvas is styled to be responsive by default:
+   ```css
+   #canvas {
+     width: 100%;
+     max-width: 100%;
+     max-height: 100vh;
+   }
+   ```
+
+   **Current Limitations**:
+   - The canvas element resizes, but the game's internal rendering viewport does not automatically scale. This means the game content will not resize to fill the new canvas dimensions - it will render at the original size specified in `conf.lua`.
+   - `love.window.setMode()` cannot change the canvas size from within game code.
+   - The `love.resize()` callback may not be triggered on canvas size changes.
+
+   **Why**: These limitations exist because SDL/Emscripten in the current LÖVE build doesn't properly handle dynamic canvas resizing without engine-level modifications.
+
+   **Recommended Approach**: Set your desired canvas size in `conf.lua` with `t.window.width` and `t.window.height`. The canvas will be responsive to browser window size changes, but the game will render at your specified resolution. For a full resizing solution, engine-level changes would be required (see issue #88 and #59 on the upstream repository).
+
 ## Building
 ### MacOS / Linux
 Clone the [megasource](https://github.com/Davidobot/megasource/tree/emscripten) and [love](https://github.com/Davidobot/love/tree/emscripten) and then run `build_lovejs.sh` (with minor changes for file paths).
