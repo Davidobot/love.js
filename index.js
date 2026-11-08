@@ -90,7 +90,7 @@ getAdditionalInfo(commander).then((args) => {
   for (let i = 0; i < files.length; i += 1) {
     const file = files[i];
     const relativePath = isDirectory(args.input) ?
-                            file.path.replace(new RegExp(`^.*${args.input}`), '') :
+                            '/' + require('path').relative(resolve(args.input), file.path) :
                             '/game.love';
     const buffer = fs.readFileSync(file.path);
     fileMetadata.push({
