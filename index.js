@@ -4,7 +4,7 @@ const commander = require('commander');
 const mustache = require('mustache');
 const fs = require('fs-extra');
 const klawSync = require('klaw-sync');
-const { sep, resolve } = require('path');
+const { sep, resolve, relative } = require('path');
 const uuid = require('uuid');
 
 commander
@@ -90,7 +90,7 @@ getAdditionalInfo(commander).then((args) => {
   for (let i = 0; i < files.length; i += 1) {
     const file = files[i];
     const relativePath = isDirectory(args.input) ?
-                            file.path.replace(new RegExp(`^.*${args.input}`), '') :
+                            '/' + relative(resolve(args.input), file.path) :
                             '/game.love';
     const buffer = fs.readFileSync(file.path);
     fileMetadata.push({
