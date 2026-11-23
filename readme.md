@@ -98,22 +98,24 @@ return texturecolor * color / 2.0;
 8. If you'd like to run javascript from within your game, you might find [the following repo useful](https://github.com/MrcSnm/Love.js-Api-Player).
 
 ## Building
-### MacOS / Linux
-Clone the [megasource](https://github.com/Davidobot/megasource/tree/emscripten) and [love](https://github.com/Davidobot/love/tree/emscripten) and then run `build_lovejs.sh` (with minor changes for file paths).
 
-That should just work™. Make sure you have CMake installed, clone [emsdk](https://github.com/emscripten-core/emsdk) and edit `build_lovejs.sh` to point to the right paths.
+The web player uses Emscripten 2.0.0. For LÖVE 11.5, check out the megasource dependencies and place the engine source in `megasource/libs/love`. [Megasource revision](https://github.com/alexjgriffith/megasource/tree/d57a1579aca1990af8a5393c59cffde0fc62042c) · [LÖVE revision](https://github.com/alexjgriffith/love/tree/13cdb8b154befcd7a0730a625ddaea075e834210)
 
-Set up emsdk with the following settings:
+Install and activate the SDK, then apply the client-side index upload patch once to that SDK. [Emscripten SDK](https://github.com/emscripten-core/emsdk/tree/2.0.0)
 
-``` bash
+```sh
+cd /path/to/emsdk
 ./emsdk install 2.0.0
 ./emsdk activate 2.0.0
+git apply --directory=upstream/emscripten "/path/to/love.js/patches/emscripten-2.0.0-client-indices.patch"
 ```
 
-Note, using v:2.0.0 is important as newer versions have depreciated `getMemory`
+Both build scripts check for the patch and relink the players so an earlier build can reuse its compiled C++ objects.
 
+### macOS / Linux
+
+Install CMake and Make. From the love.js checkout, run `./build_lovejs.sh /path/to/megasource /path/to/emsdk` using absolute paths.
 
 ### Windows
-Clone the [megasource](https://github.com/Davidobot/megasource/tree/emscripten) and [love](https://github.com/Davidobot/love/tree/emscripten) and then run `build_lovejs.bat` (with minor changes for file paths) in PowerShell.
 
-Make sure you have CMake and Make (e.g. through [chocolatey](https://chocolatey.org/packages/make)), and that you have the latest Visual Studio build bundles installed. Clone [emsdk](https://github.com/emscripten-core/emsdk) and edit `build_lovejs.bat` to point to the right paths.
+Install CMake, Make and the Visual Studio build tools. Set the SDK and megasource paths in `build_lovejs.bat`, then run it from the love.js checkout.
