@@ -1,0 +1,38 @@
+--- a/src/library_webgl.js
++++ b/src/library_webgl.js
+@@ -339,10 +339,12 @@
+       if (ibo) {
+         return ibo;
+       }
++      ibo = GL.currentContext.tempIndexBuffers[idx] = GLctx.createBuffer();
++#if LEGACY_GL_EMULATION
+       var prevIBO = GLctx.getParameter(0x8895 /*ELEMENT_ARRAY_BUFFER_BINDING*/);
+-      GL.currentContext.tempIndexBuffers[idx] = GLctx.createBuffer();
+-      GLctx.bindBuffer(0x8893 /*GL_ELEMENT_ARRAY_BUFFER*/, GL.currentContext.tempIndexBuffers[idx]);
++      GLctx.bindBuffer(0x8893 /*GL_ELEMENT_ARRAY_BUFFER*/, ibo);
+       GLctx.bufferData(0x8893 /*GL_ELEMENT_ARRAY_BUFFER*/, 1 << idx, 0x88E8 /*GL_DYNAMIC_DRAW*/);
+       GLctx.bindBuffer(0x8893 /*GL_ELEMENT_ARRAY_BUFFER*/, prevIBO);
+-      return GL.currentContext.tempIndexBuffers[idx];
++#endif
++      return ibo;
+     },
+@@ -3481,12 +3483,16 @@
+ #if FULL_ES2
+     var buf;
+     if (!GLctx.currentElementArrayBufferBinding) {
++      if (count < 0) {
++        // Let WebGL report the error without creating a heap view.
++        GLctx.drawElements(mode, count, type, 0);
++        return;
++      }
+       var size = GL.calcBufLength(1, type, 0, count);
+       buf = GL.getTempIndexBuffer(size);
+       GLctx.bindBuffer(0x8893 /*GL_ELEMENT_ARRAY_BUFFER*/, buf);
+-      GLctx.bufferSubData(0x8893 /*GL_ELEMENT_ARRAY_BUFFER*/,
+-                               0,
+-                               HEAPU8.subarray(indices, indices + size));
++      GLctx.bufferData(0x8893 /*GL_ELEMENT_ARRAY_BUFFER*/,
++                       HEAPU8.subarray(indices, indices + size), 0x88E0 /*GL_STREAM_DRAW*/);
+       // the index is now 0
+       indices = 0;
+     }
